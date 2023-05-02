@@ -1,0 +1,17 @@
+#!/opt/bin/swoole-cli
+<?php
+
+use Bref\Context\Context;
+use Bref\Runtime\LambdaRuntime;
+use Swoole\Coroutine;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$runtime = LambdaRuntime::fromEnvironmentVariable('swoole-cli');
+$handler = require $_ENV['LAMBDA_TASK_ROOT'] . '/handler.php';
+
+Coroutine\run(static function () use ($runtime, $handler): void {
+    while (true) {
+        $runtime->processNextEvent($handler);
+    }
+});
