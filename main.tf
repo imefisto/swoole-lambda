@@ -57,3 +57,33 @@ resource "aws_iam_role" "role_for_lambda" {
     ]
   })
 }
+
+resource "aws_cloudwatch_log_group" "logs" {
+  name = "/aws/lambda/swoole-lambda"
+  retention_in_days = 3
+}
+
+resource "aws_iam_policy" "swoole_lambda_policy" {
+  name = "swoole-lambda-policy"
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource": [
+          "${aws_cloudwatch_log_group.logs.arn}:*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attachment" {
+  role       = aws_iam_role.role_for_lambda.name
+  policy_arn = aws_iam_policy.swoole_lambda_policy.arn
+}
