@@ -1,25 +1,13 @@
-resource "null_resource" "runtime_zip" {
-  provisioner "local-exec" {
-    command = "zip -r ./runtime.zip bootstrap bin"
-  }
-}
-
-resource "null_resource" "vendor_zip" {
-  provisioner "local-exec" {
-    command = "zip -r ./vendor.zip vendor"
-  }
-}
-
 resource "aws_lambda_layer_version" "runtime_layer" {
   layer_name = "swoole-runtime"
   filename = "runtime.zip"
-  depends_on = [null_resource.runtime_zip]
+  source_code_hash = filebase64sha256("runtime.zip")
 }
 
 resource "aws_lambda_layer_version" "vendor_layer" {
   layer_name = "swoole-vendor"
   filename = "vendor.zip"
-  depends_on = [null_resource.vendor_zip]
+  source_code_hash = filebase64sha256("vendor.zip")
 }
 
 data "archive_file" "swoole_lambda" {
@@ -39,6 +27,12 @@ resource "aws_lambda_function" "swoole_lambda" {
     aws_lambda_layer_version.runtime_layer.arn,
     aws_lambda_layer_version.vendor_layer.arn,
   ]
+  timeout = 10
+  environment {
+    variables = {
+      URLS = join(",", var.urls)
+    }
+  }
 }
 
 resource "aws_iam_role" "role_for_lambda" {

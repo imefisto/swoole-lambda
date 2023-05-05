@@ -1,5 +1,8 @@
 {
     "require": {
-        "bref/bref": "^2.0"
+        "bref/bref": "^2.0",
+        "slim/slim": "4.*",
+        "guzzlehttp/guzzle": "^7.0",
+        "monolog/monolog": "^3.3"
     }
 }
