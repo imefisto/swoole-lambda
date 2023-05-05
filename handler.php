@@ -19,6 +19,16 @@ $app = AppFactory::create();
 $logger = new Logger('name');
 $logger->pushHandler(new StreamHandler('php://stderr', Level::Info));
 
+$app->get('/hello', function (Request $request, Response $response, $args) use ($logger) {
+    $body = [
+        'status' => 'Hello!',
+    ];
+
+    $response->getBody()->write(json_encode($body));
+    return $response
+        ->withHeader('Content-Type', 'application/json');
+});
+
 $app->get('/', function (Request $request, Response $response, $args) use ($logger) {
     $start = microtime(true);
     $urls = explode(',', getenv('URLS'));
